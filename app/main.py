@@ -478,6 +478,8 @@ def generate_auto_reply(message):
             return reply
     return "🤖 Спасибо за обращение! Наш специалист свяжется с вами."
 
+# Всегда создаём базу при запуске
+init_db()
+
 if __name__ == '__main__':
-    init_db()
     app.run(debug=True)
