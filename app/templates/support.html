@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поддержка · HotelBooking</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #faf9f7;
+            color: #2c2c2c;
+        }
+
+        .header {
+            background: white;
+            border-bottom: 1px solid #e8e0d5;
+            padding: 16px 28px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .logo a {
+            text-decoration: none;
+            color: #3d3226;
+        }
+
+        .nav a {
+            color: #6b5e53;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        .main-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .support-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .support-header h1 {
+            font-size: 2rem;
+            color: #3d3226;
+            margin-bottom: 10px;
+        }
+
+        .message-form {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #8b7d6b;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e8e0d5;
+            border-radius: 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #b8a088;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: #3d3226;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-submit:hover {
+            background: #2c241b;
+        }
+
+        .reply-section {
+            background: linear-gradient(135deg, #f0ebe4, #e8e0d5);
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 20px;
+            border-left: 4px solid #b8a088;
+        }
+
+        .reply-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .reply-header i {
+            font-size: 1.5rem;
+            color: #b8a088;
+        }
+
+        .reply-content {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            white-space: pre-line;
+            line-height: 1.6;
+        }
+
+        .faq-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+
+        .faq-section h3 {
+            margin-bottom: 20px;
+            color: #3d3226;
+        }
+
+        .faq-item {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #e8e0d5;
+            padding-bottom: 12px;
+        }
+
+        .faq-question {
+            font-weight: 600;
+            color: #3d3226;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-answer {
+            color: #6b5e53;
+            font-size: 0.9rem;
+            display: none;
+            margin-top: 10px;
+        }
+
+        .faq-answer.show {
+            display: block;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            color: #6b5e53;
+            text-decoration: none;
+        }
+
+        .flash {
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .flash.success {
+            background: #d4edda;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div class="logo">
+                <a href="/">HotelBooking</a>
+            </div>
+            <div class="nav">
+                <a href="/">Главная</a>
+                <a href="/hotels">Отели</a>
+                {% if session.username %}
+                    <a href="/my_bookings">Мои бронирования</a>
+                    <a href="/logout">Выйти</a>
+                {% else %}
+                    <a href="/login">Войти</a>
+                    <a href="/register">Регистрация</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="support-header">
+            <h1><i class="fas fa-headset"></i> Поддержка</h1>
+            <p>Задайте вопрос, и наш виртуальный помощник сразу ответит</p>
+        </div>
+
+        <div class="message-form">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endwith %}
+
+            <form method="POST">
+                {% if not session.username %}
+                <div class="form-group">
+                    <label>Ваш email</label>
+                    <input type="email" name="email" placeholder="example@mail.com" required>
+                </div>
+                {% endif %}
+                <div class="form-group">
+                    <label>Сообщение</label>
+                    <textarea name="message" placeholder="Опишите ваш вопрос..." required></textarea>
+                </div>
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-paper-plane"></i> Отправить
+                </button>
+            </form>
+
+            {% if show_reply and bot_reply %}
+            <div class="reply-section">
+                <div class="reply-header">
+                    <i class="fas fa-robot"></i>
+                    <h3>Ответ помощника</h3>
+                </div>
+                <div class="reply-content">
+                    {{ bot_reply|replace('\n', '<br>')|safe }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="faq-section">
+            <h3><i class="fas fa-question-circle"></i> Частые вопросы</h3>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    Как забронировать отель? <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">На главной странице выберите город, даты и количество гостей, нажмите "Найти". Выберите отель и заполните форму бронирования.</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    Как отменить бронирование? <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">Напишите нам на support@hotelbooking.com с номером бронирования.</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    Какие способы оплаты? <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">Оплата картой онлайн или наличными/картой при заезде. Предоплата не требуется.</div>
+            </div>
+        </div>
+
+        <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> На главную</a>
+    </div>
+
+    <script>
+        function toggleFaq(element) {
+            element.classList.toggle('active');
+            const answer = element.nextElementSibling;
+            answer.classList.toggle('show');
+        }
+    </script>
+</body>
+</html>

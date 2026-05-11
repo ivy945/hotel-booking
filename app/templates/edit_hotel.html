@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Редактирование отеля · HotelBooking</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #faf9f7;
+            color: #2c2c2c;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ----- ХЕДЕР ----- */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.9);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 16px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .header h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #3d3226;
+            letter-spacing: -0.3px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-right span {
+            color: #6b5e53;
+            font-size: 0.9rem;
+        }
+
+        .header-right a {
+            color: #6b5e53;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(0,0,0,0.08);
+            transition: all 0.2s;
+        }
+
+        .header-right a:hover {
+            color: #3d3226;
+            border-color: rgba(0,0,0,0.15);
+        }
+
+        /* ----- КОНТЕЙНЕР ----- */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 28px 24px;
+        }
+
+        /* ----- ФОРМА ----- */
+        .edit-form {
+            background: #ffffff;
+            padding: 32px;
+            border-radius: 24px;
+            border: 1px solid rgba(0,0,0,0.04);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.03);
+        }
+
+        .edit-form h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #3d3226;
+            margin-bottom: 28px;
+            letter-spacing: -0.3px;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #8b7d6b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            background: #faf9f7;
+            border: 2px solid #e8e0d5;
+            border-radius: 14px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            color: #3d3226;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #b8a088;
+            box-shadow: 0 0 0 3px rgba(184,160,136,0.1);
+            background: #ffffff;
+        }
+
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .form-group input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            background: #faf9f7;
+            border: 2px solid #e8e0d5;
+            border-radius: 14px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 6px;
+            color: #b8a088;
+            font-size: 0.8rem;
+        }
+
+        .form-group.checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group.checkbox-group label {
+            margin-bottom: 0;
+            cursor: pointer;
+            text-transform: none;
+            letter-spacing: 0;
+            font-size: 0.9rem;
+            color: #3d3226;
+        }
+
+        .form-group.checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #3d3226;
+            cursor: pointer;
+        }
+
+        /* ----- ТЕКУЩЕЕ ФОТО ----- */
+        .current-photo {
+            background: #faf9f7;
+            padding: 18px;
+            border-radius: 14px;
+            border: 1px solid rgba(0,0,0,0.04);
+            margin-top: 8px;
+        }
+
+        .current-photo img {
+            max-width: 220px;
+            border-radius: 12px;
+            margin-top: 10px;
+            border: 1px solid rgba(0,0,0,0.06);
+        }
+
+        .current-photo p {
+            color: #6b5e53;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+
+        .photo-preview {
+            margin-top: 12px;
+        }
+
+        .photo-preview img {
+            max-width: 220px;
+            border-radius: 12px;
+            border: 1px solid rgba(0,0,0,0.06);
+        }
+
+        /* ----- КНОПКИ ----- */
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 28px;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 14px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s ease;
+            letter-spacing: -0.2px;
+        }
+
+        .btn-primary {
+            background: #3d3226;
+            color: white;
+            box-shadow: 0 6px 20px rgba(61,50,38,0.15);
+        }
+
+        .btn-primary:hover {
+            background: #2c241b;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 28px rgba(61,50,38,0.25);
+        }
+
+        .btn-cancel {
+            background: #ffffff;
+            color: #6b5e53;
+            border: 2px solid #e8e0d5;
+        }
+
+        .btn-cancel:hover {
+            border-color: #b8a088;
+            color: #3d3226;
+        }
+
+        /* ----- FLASH ----- */
+        .flash-messages {
+            margin-bottom: 24px;
+        }
+
+        .flash {
+            padding: 14px 20px;
+            border-radius: 16px;
+            margin-bottom: 10px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .flash.success {
+            background: rgba(72, 180, 97, 0.08);
+            color: #3d6b4a;
+            border: 1px solid rgba(72, 180, 97, 0.2);
+        }
+
+        .flash.error {
+            background: rgba(220, 80, 80, 0.06);
+            color: #8b3d3d;
+            border: 1px solid rgba(220, 80, 80, 0.15);
+        }
+
+        /* ----- АДАПТИВНОСТЬ ----- */
+        @media (max-width: 600px) {
+            .header {
+                flex-direction: column;
+                gap: 12px;
+                padding: 14px 20px;
+            }
+
+            .header-right {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .edit-form {
+                padding: 24px 20px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>✏️ Редактирование отеля</h2>
+        <div class="header-right">
+            <span>👋 {{ session.username }}</span>
+            <a href="/admin"><i class="fas fa-arrow-left"></i> Назад в админку</a>
+        </div>
+    </div>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="edit-form">
+            <h1><i class="fas fa-pen"></i> Редактировать: {{ hotel.name }}</h1>
+            
+            <form method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label>Название отеля *</label>
+                    <input type="text" name="name" value="{{ hotel.name }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Город *</label>
+                    <input type="text" name="city" value="{{ hotel.city }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Цена за ночь (₽) *</label>
+                    <input type="number" name="price" value="{{ hotel.price_per_night }}" required min="0">
+                </div>
+                
+                <div class="form-group">
+                    <label>Количество номеров *</label>
+                    <input type="number" name="rooms" value="{{ hotel.rooms_total }}" required min="1">
+                </div>
+                
+                <div class="form-group">
+                    <label>Описание</label>
+                    <textarea name="description" placeholder="Подробное описание отеля...">{{ hotel.description }}</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Текущее фото</label>
+                    <div class="current-photo">
+                        {% if hotel.image_url %}
+                            <p style="color: #8b7d6b;">📷 Загруженное изображение:</p>
+                            <img src="{{ hotel.image_url }}" alt="{{ hotel.name }}">
+                            <p style="margin-top: 8px; font-size: 0.8rem; color: #b8a088; word-break: break-all;">{{ hotel.image_url }}</p>
+                        {% else %}
+                            <p style="color: #b8a088;">Нет фото</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>🖼️ Загрузить новое фото</label>
+                    <input type="file" name="hotel_image" accept="image/*" id="hotel_image" onchange="previewImage()">
+                    <div class="photo-preview" id="photo_preview"></div>
+                    <small>Оставьте пустым, чтобы сохранить текущее фото</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>🔗 Или ссылка на фото (URL)</label>
+                    <input type="text" name="image_url" placeholder="https://..." value="{{ hotel.image_url if hotel.image_url and not hotel.image_url.startswith('/static/uploads/') else '' }}">
+                    <small>При загрузке нового файла это поле можно оставить пустым</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>Рейтинг (0–5)</label>
+                    <input type="number" name="rating" step="0.1" min="0" max="5" value="{{ hotel.rating }}">
+                </div>
+                
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" name="is_featured" id="is_featured" {% if hotel.is_featured %}checked{% endif %}>
+                    <label for="is_featured">⭐ Лучший отель (показывать на главной)</label>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Сохранить изменения</button>
+                    <a href="/admin" class="btn btn-cancel"><i class="fas fa-times"></i> Отмена</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function previewImage() {
+            const file = document.getElementById('hotel_image').files[0];
+            const preview = document.getElementById('photo_preview');
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = `
+                        <p style="color: #8b7d6b; font-size: 0.85rem; margin-bottom: 6px;">📷 Новое фото:</p>
+                        <img src="${e.target.result}" alt="Предпросмотр">
+                    `;
+                }
+                reader.readAsDataURL(file);
+            } else {
+                preview.innerHTML = '';
+            }
+        }
+    </script>
+</body>
+</html>

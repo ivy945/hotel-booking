@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>HotelBooking · Люксовые отели</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #faf9f7;
+      color: #2c2c2c;
+      overflow-x: hidden;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ----- НЕЙТРАЛЬНЫЙ ФОН ----- */
+    .bg-gradient {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background: linear-gradient(160deg, #fdfcfb 0%, #f5f2ed 40%, #ede7dd 100%);
+      pointer-events: none;
+    }
+
+    /* Декоративные круги — бледные, тёплые */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      opacity: 0.2;
+      z-index: -1;
+      pointer-events: none;
+    }
+    .orb-1 {
+      width: 600px; height: 600px;
+      background: #d4c5b9;
+      top: -200px; left: -150px;
+    }
+    .orb-2 {
+      width: 500px; height: 500px;
+      background: #c9b8a8;
+      bottom: -180px; right: -120px;
+    }
+    .orb-3 {
+      width: 350px; height: 350px;
+      background: #ddd0c0;
+      top: 40%; left: 55%;
+      opacity: 0.15;
+    }
+
+    /* ----- ХЕДЕР ----- */
+    .header {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 92%;
+      max-width: 1400px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      border-radius: 60px;
+      padding: 16px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 1000;
+      transition: box-shadow 0.3s ease, background 0.3s ease;
+    }
+
+    .header.scrolled {
+      background: #ffffff;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: 700;
+      color: #3d3226;
+      letter-spacing: -0.5px;
+    }
+    .logo a {
+      text-decoration: none;
+      color: #3d3226;
+      transition: color 0.2s;
+    }
+    .logo a:hover {
+      color: #8b7355;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .nav a, .nav span {
+      color: #6b5e53;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: color 0.2s ease;
+    }
+    .nav a:hover {
+      color: #3d3226;
+    }
+
+    .btn-outline {
+      padding: 10px 22px;
+      border-radius: 40px;
+      border: 1.5px solid rgba(0,0,0,0.12);
+      background: #ffffff;
+      font-weight: 600;
+      color: #5c4f42;
+      transition: all 0.25s ease;
+    }
+    .btn-outline:hover {
+      border-color: #b8a088;
+      box-shadow: 0 8px 20px rgba(139,115,85,0.1);
+      transform: translateY(-1px);
+      color: #3d3226;
+    }
+
+    /* ----- HERO ----- */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 100px 2rem 60px;
+      text-align: center;
+    }
+
+    .hero-inner {
+      max-width: 1100px;
+      width: 100%;
+    }
+
+    .hero h1 {
+      font-size: clamp(44px, 8vw, 80px);
+      font-weight: 700;
+      line-height: 1.08;
+      letter-spacing: -2px;
+      margin-bottom: 1.2rem;
+      color: #3d3226;
+    }
+
+    .hero p {
+      font-size: 1.25rem;
+      color: #8b7d6b;
+      margin-bottom: 3rem;
+    }
+
+    /* ----- ПОИСК ----- */
+    .search-card {
+      background: #ffffff;
+      border-radius: 28px;
+      padding: 2rem 2rem;
+      border: 1px solid rgba(0,0,0,0.04);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.04);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .search-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 28px 60px rgba(0,0,0,0.06);
+    }
+
+    .search-form {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1fr auto;
+      gap: 16px;
+      align-items: end;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      font-size: 0.75rem;
+      letter-spacing: 0.8px;
+      color: #8b7d6b;
+      text-transform: uppercase;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 14px 16px;
+      background: #faf9f7;
+      border: 2px solid #e8e0d5;
+      border-radius: 16px;
+      font-size: 1rem;
+      color: #3d3226;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .field input:focus {
+      outline: none;
+      border-color: #b8a088;
+      box-shadow: 0 0 0 3px rgba(184,160,136,0.1);
+      background: #ffffff;
+    }
+    .field input::placeholder {
+      color: #c4b8a7;
+    }
+
+    .btn-search {
+      height: 50px;
+      padding: 0 32px;
+      background: #3d3226;
+      color: white;
+      border: none;
+      border-radius: 16px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.3s;
+      box-shadow: 0 8px 24px rgba(61,50,38,0.2);
+    }
+    .btn-search:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 32px rgba(61,50,38,0.3);
+      background: #2c241b;
+    }
+
+    /* ----- СЕКЦИИ ----- */
+    .container {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .section-title {
+      font-size: 2.6rem;
+      font-weight: 700;
+      text-align: center;
+      margin: 5rem 0 2.5rem;
+      color: #3d3226;
+      letter-spacing: -1px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 30px;
+      margin-bottom: 50px;
+    }
+
+    /* ----- КАРТОЧКА ОТЕЛЯ ----- */
+    .hotel-card {
+      background: #ffffff;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid rgba(0,0,0,0.04);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.02);
+      transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.3s ease;
+      cursor: pointer;
+      position: relative;
+    }
+    .hotel-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 24px 48px rgba(0,0,0,0.06);
+      border-color: rgba(184,160,136,0.3);
+    }
+
+    .hotel-img {
+      height: 240px;
+      background-size: cover;
+      background-position: center;
+      transition: transform 0.5s ease;
+    }
+    .hotel-card:hover .hotel-img {
+      transform: scale(1.03);
+    }
+
+    .badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: #ffffff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      border: 1px solid #d4b896;
+      color: #7a5c3e;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    }
+
+    .hotel-body {
+      padding: 22px;
+    }
+    .hotel-body h3 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #2c2c2c;
+    }
+    .hotel-body .location {
+      color: #8b7d6b;
+      font-size: 0.9rem;
+      margin-bottom: 12px;
+    }
+    .price {
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: #3d3226;
+      margin-bottom: 16px;
+    }
+    .price span {
+      font-size: 0.75rem;
+      color: #b8a088;
+      font-weight: 500;
+    }
+    .btn-book {
+      display: inline-block;
+      background: #3d3226;
+      color: white;
+      padding: 10px 24px;
+      border-radius: 24px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .btn-book:hover {
+      background: #5c4f42;
+      transform: translateY(-2px);
+    }
+
+    /* ----- ГОРОДА ----- */
+    .cities-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 18px;
+      margin-bottom: 60px;
+    }
+    .city-card {
+      background: #ffffff;
+      padding: 28px 16px;
+      text-align: center;
+      border-radius: 24px;
+      border: 1px solid rgba(0,0,0,0.04);
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.01);
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s;
+    }
+    .city-card:hover {
+      transform: translateY(-6px);
+      border-color: #c9b8a8;
+      box-shadow: 0 18px 32px rgba(0,0,0,0.05);
+    }
+    .city-card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #3d3226;
+    }
+    .city-card p {
+      color: #8b7d6b;
+      font-size: 0.85rem;
+      margin-top: 4px;
+    }
+
+    /* ----- FOOTER ----- */
+    footer {
+      text-align: center;
+      padding: 35px;
+      background: #ffffff;
+      border-top: 1px solid rgba(0,0,0,0.04);
+      color: #8b7d6b;
+    }
+
+    /* Flash */
+    .flash {
+      padding: 12px 18px;
+      background: rgba(184,160,136,0.08);
+      color: #6b5e53;
+      border-radius: 14px;
+      margin-bottom: 18px;
+      font-weight: 500;
+      border: 1px solid rgba(184,160,136,0.2);
+    }
+
+    @media (max-width: 850px) {
+      .search-form {
+        grid-template-columns: 1fr;
+      }
+      .header {
+        flex-direction: column;
+        gap: 12px;
+        padding: 16px 24px;
+        border-radius: 32px;
+      }
+      .nav {
+        gap: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-gradient"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <header class="header" id="header">
+    <div class="logo"><a href="/">HotelBooking</a></div>
+    <div class="nav">
+      <a href="/">Главная</a>
+      <a href="/hotels">Все отели</a>
+      {% if session.username %}
+        <span>👋 {{ session.username }}</span>
+        <a href="/my_bookings">Мои бронирования</a>
+        <a href="/support">Поддержка</a>
+        <a href="/logout">Выйти</a>
+        {% if session.is_admin %}
+          <a href="/admin" class="btn-outline">Админ</a>
+        {% endif %}
+      {% else %}
+        <a href="/login" class="btn-outline">Войти</a>
+        <a href="/register">Регистрация</a>
+      {% endif %}
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <h1>Роскошь за горизонтом</h1>
+      <p>Более 5000 люксовых отелей в самых красивых уголках мира</p>
+
+      <div class="search-card">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form class="search-form" method="POST" action="/search">
+          <div class="field">
+            <label>🌆 Город</label>
+            <input type="text" name="city" placeholder="Куда?" required>
+          </div>
+          <div class="field">
+            <label>📅 Заезд</label>
+            <input type="date" name="check_in" required>
+          </div>
+          <div class="field">
+            <label>📅 Выезд</label>
+            <input type="date" name="check_out" required>
+          </div>
+          <button type="submit" class="btn-search"><i class="fas fa-search"></i> НАЙТИ</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <h2 class="section-title">Лучшие предложения</h2>
+    <div class="grid">
+      {% for hotel in featured_hotels %}
+      <div class="hotel-card">
+        <div class="hotel-img" style="background-image: url('{{ hotel.image_url }}');">
+          <div class="badge"><i class="fas fa-star"></i> {{ hotel.rating }}</div>
+        </div>
+        <div class="hotel-body">
+          <h3>{{ hotel.name }}</h3>
+          <div class="location"><i class="fas fa-map-marker-alt"></i> {{ hotel.city }}</div>
+          <div class="price">{{ hotel.price_per_night }} ₽ <span>/ночь</span></div>
+          <a href="/hotel/{{ hotel.id }}" class="btn-book">Подробнее →</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <h2 class="section-title">Популярные направления</h2>
+    <div class="cities-grid">
+      {% for city in cities %}
+      <div class="city-card" onclick="selectCity('{{ city.city }}')">
+        <h3>{{ city.city }}</h3>
+        <p>{{ city.count }} отелей</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2026 HotelBooking · Ilya Kushnarev accomplished it.</p>
+  </footer>
+
+  <script>
+    (function() {
+      const header = document.getElementById('header');
+      
+      function onScroll() {
+        if (window.scrollY > 40) {
+          header.classList.add('scrolled');
+        } else {
+          header.classList.remove('scrolled');
+        }
+      }
+      
+      window.addEventListener('scroll', onScroll, { passive: true });
+
+      document.addEventListener('mousemove', (e) => {
+        const x = (e.clientX / window.innerWidth - 0.5) * 20;
+        const y = (e.clientY / window.innerHeight - 0.5) * 20;
+        
+        const orb1 = document.querySelector('.orb-1');
+        const orb2 = document.querySelector('.orb-2');
+        const orb3 = document.querySelector('.orb-3');
+        
+        if (orb1) orb1.style.transform = `translate(${x * 0.4}px, ${y * 0.4}px)`;
+        if (orb2) orb2.style.transform = `translate(${x * -0.3}px, ${y * -0.3}px)`;
+        if (orb3) orb3.style.transform = `translate(${x * 0.25}px, ${y * 0.25}px)`;
+      });
+
+      const today = new Date().toISOString().split('T')[0];
+      const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+      const checkIn = document.querySelector('input[name="check_in"]');
+      const checkOut = document.querySelector('input[name="check_out"]');
+      if (checkIn && !checkIn.value) checkIn.value = today;
+      if (checkOut && !checkOut.value) checkOut.value = tomorrow;
+      document.querySelectorAll('input[type="date"]').forEach(i => i.min = today);
+
+      window.selectCity = function(name) {
+        const input = document.querySelector('input[name="city"]');
+        if (input) {
+          input.value = name;
+          input.focus();
+          document.querySelector('.btn-search')?.click();
+        }
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }
+        });
+      }, { threshold: 0.1 });
+
+      document.querySelectorAll('.hotel-card, .city-card').forEach((el, i) => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(24px)';
+        el.style.transition = `opacity 0.5s ease ${i * 0.03}s, transform 0.5s ease ${i * 0.03}s`;
+        observer.observe(el);
+      });
+    })();
+  </script>
+</body>
+</html>

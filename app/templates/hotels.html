@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Результаты поиска · HotelBooking</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #faf9f7;
+            color: #2c2c2c;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ----- ХЕДЕР ----- */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.9);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 20px 28px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            margin-bottom: 28px;
+        }
+
+        .header-content {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #3d3226;
+            letter-spacing: -0.3px;
+            margin-bottom: 6px;
+        }
+
+        .header-details {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            color: #8b7d6b;
+            font-size: 0.9rem;
+        }
+
+        .header-details span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .header-details i {
+            color: #b8a088;
+        }
+
+        /* ----- КОНТЕЙНЕР ----- */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 24px 40px;
+        }
+
+        .results-count {
+            font-size: 0.9rem;
+            color: #8b7d6b;
+            margin-bottom: 20px;
+        }
+
+        .results-count strong {
+            color: #3d3226;
+            font-weight: 700;
+        }
+
+        /* ----- КАРТОЧКА ОТЕЛЯ ----- */
+        .hotel-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 18px;
+            border: 1px solid rgba(0,0,0,0.04);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.02);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 24px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .hotel-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.05);
+            border-color: rgba(184,160,136,0.2);
+        }
+
+        .hotel-info {
+            flex: 1;
+        }
+
+        .hotel-info h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #3d3226;
+            margin-bottom: 10px;
+            letter-spacing: -0.3px;
+        }
+
+        .hotel-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 6px;
+        }
+
+        .hotel-meta span {
+            font-size: 0.85rem;
+            color: #6b5e53;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .hotel-meta i {
+            color: #b8a088;
+            font-size: 0.8rem;
+        }
+
+        .hotel-description {
+            font-size: 0.85rem;
+            color: #8b7d6b;
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        .rooms-info {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 4px 12px;
+            background: #faf9f7;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            color: #6b5e53;
+            font-weight: 500;
+        }
+
+        .rooms-info i {
+            color: #b8a088;
+            margin-right: 4px;
+        }
+
+        /* ----- ЦЕНА И КНОПКА ----- */
+        .hotel-action {
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .price {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #3d3226;
+            margin-bottom: 4px;
+            white-space: nowrap;
+        }
+
+        .price span {
+            font-size: 0.8rem;
+            color: #b8a088;
+            font-weight: 500;
+        }
+
+        .btn-book {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 22px;
+            background: #3d3226;
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.25s;
+            margin-top: 10px;
+            box-shadow: 0 4px 14px rgba(61,50,38,0.15);
+        }
+
+        .btn-book:hover {
+            background: #2c241b;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 22px rgba(61,50,38,0.25);
+        }
+
+        /* ----- НЕТ РЕЗУЛЬТАТОВ ----- */
+        .no-results {
+            text-align: center;
+            padding: 60px 30px;
+            background: #ffffff;
+            border-radius: 20px;
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+
+        .no-results-icon {
+            font-size: 3rem;
+            color: #c4b8a7;
+            margin-bottom: 16px;
+        }
+
+        .no-results h3 {
+            font-size: 1.2rem;
+            color: #3d3226;
+            margin-bottom: 8px;
+        }
+
+        .no-results p {
+            color: #8b7d6b;
+            margin-bottom: 20px;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: #3d3226;
+            color: white;
+            text-decoration: none;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.25s;
+            box-shadow: 0 6px 20px rgba(61,50,38,0.15);
+        }
+
+        .btn-back:hover {
+            background: #2c241b;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 28px rgba(61,50,38,0.25);
+        }
+
+        /* ----- АДАПТИВНОСТЬ ----- */
+        @media (max-width: 650px) {
+            .hotel-card {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: left;
+            }
+
+            .hotel-action {
+                text-align: left;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .price {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h2><i class="fas fa-search"></i> Результаты поиска</h2>
+            <div class="header-details">
+                <span><i class="fas fa-map-marker-alt"></i> {{ city }}</span>
+                <span><i class="fas fa-calendar"></i> {{ check_in }} → {{ check_out }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        {% if hotels %}
+            <div class="results-count">
+                Найдено отелей: <strong>{{ hotels|length }}</strong>
+            </div>
+
+            {% for hotel in hotels %}
+            <div class="hotel-card">
+                <div class="hotel-info">
+                    <h3>{{ hotel.name }}</h3>
+                    <div class="hotel-meta">
+                        <span><i class="fas fa-map-marker-alt"></i> {{ hotel.city }}</span>
+                        <span><i class="fas fa-star"></i> {{ hotel.description }}</span>
+                    </div>
+                    <div class="rooms-info">
+                        <i class="fas fa-bed"></i> {{ hotel.available_rooms }} из {{ hotel.rooms_total }} номеров свободно
+                    </div>
+                    <div class="hotel-description">
+                        💰 {{ hotel.price_per_night }} ₽ за ночь
+                    </div>
+                </div>
+                <div class="hotel-action">
+                    <div class="price">{{ hotel.price_per_night }} ₽ <span>/ночь</span></div>
+                    <a href="/book/{{ hotel.id }}?check_in={{ check_in }}&check_out={{ check_out }}" class="btn-book">
+                        Забронировать <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-results">
+                <div class="no-results-icon"><i class="fas fa-search"></i></div>
+                <h3>Отелей не найдено</h3>
+                <p>Попробуйте изменить город или даты</p>
+                <a href="/" class="btn-back"><i class="fas fa-arrow-left"></i> Вернуться на главную</a>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
