@@ -42,6 +42,11 @@ def get_db():
     return conn
 
 def init_db():
+    # Удаляем старую базу если есть
+    if os.path.exists('hotels.db'):
+        os.remove('hotels.db')
+        print("Старая база удалена")
+    
     conn = get_db()
     cursor = conn.cursor()
     
@@ -90,47 +95,27 @@ def init_db():
     ''')
     
     # Добавляем тестовых пользователей
-    cursor.execute("SELECT COUNT(*) FROM users")
-    if cursor.fetchone()[0] == 0:
-        users = [
-            ('admin', 'admin@hotelbooking.com', 'admin123', 1),
-            ('user', 'user@example.com', 'user123', 0),
-        ]
-        cursor.executemany("INSERT INTO users (username, email, password, is_admin) VALUES (?, ?, ?, ?)", users)
+    users = [
+        ('admin', 'admin@hotelbooking.com', 'admin123', 1),
+        ('user', 'user@example.com', 'user123', 0),
+    ]
+    cursor.executemany("INSERT INTO users (username, email, password, is_admin) VALUES (?, ?, ?, ?)", users)
     
     # Добавляем отели
-    cursor.execute("SELECT COUNT(*) FROM hotels")
-    if cursor.fetchone()[0] == 0:
-        hotels = [
-            ('Лотте Отель', 'Москва', 7000, 30, 'Роскошный 5-звездочный отель в самом центре Москвы', '/static/uploads/20260511_233259_hotel2.jpg', 1, 5.0),
-            ('История', 'Санкт-Петербург', 6000, 50, 'Уютный отель с панорамным видом на Неву', '/static/uploads/20260511_233400_hotel3.jpg', 1, 5.0),
-            ('Отель ДЭМ', 'Сухум', 8000, 20, 'Курортный отель с собственным пляжем', '/static/uploads/20260511_233501_hotel4.jpg', 1, 5.0),
-            ('Дворец Трезини', 'Санкт-Петербург', 10000, 21, 'Элегантный отель в историческом центре', '/static/uploads/20260511_233553_hotel5.jpg', 1, 5.0),
-            ('Отель Долина 960', 'Эсто-Садок', 5000, 20, 'Современный отель в горах', '/static/uploads/20260511_233716_hotel6.jpg', 1, 4.0),
-            ('Элементс', 'Киров', 4000, 40, 'Бизнес-отель в деловом центре', '/static/uploads/20260511_233825_hotel7.jpg', 1, 4.0),
-        ]
-        cursor.executemany('''INSERT INTO hotels (name, city, price_per_night, rooms_total, description, image_url, is_featured, rating) 
-                            VALUES (?,?,?,?,?,?,?,?)''', hotels)
+    hotels = [
+        ('Лотте Отель', 'Москва', 7000, 30, 'Роскошный 5-звездочный отель в самом центре Москвы', '/static/uploads/20260511_233259_hotel2.jpg', 1, 5.0),
+        ('История', 'Санкт-Петербург', 6000, 50, 'Уютный отель с панорамным видом на Неву', '/static/uploads/20260511_233400_hotel3.jpg', 1, 5.0),
+        ('Отель ДЭМ', 'Сухум', 8000, 20, 'Курортный отель с собственным пляжем', '/static/uploads/20260511_233501_hotel4.jpg', 1, 5.0),
+        ('Дворец Трезини', 'Санкт-Петербург', 10000, 21, 'Элегантный отель в историческом центре', '/static/uploads/20260511_233553_hotel5.jpg', 1, 5.0),
+        ('Отель Долина 960', 'Эсто-Садок', 5000, 20, 'Современный отель в горах', '/static/uploads/20260511_233716_hotel6.jpg', 1, 4.0),
+        ('Элементс', 'Киров', 4000, 40, 'Бизнес-отель в деловом центре', '/static/uploads/20260511_233825_hotel7.jpg', 1, 4.0),
+    ]
+    cursor.executemany('''INSERT INTO hotels (name, city, price_per_night, rooms_total, description, image_url, is_featured, rating) 
+                        VALUES (?,?,?,?,?,?,?,?)''', hotels)
     
     conn.commit()
     conn.close()
-
-def migrate_db():
-    conn = get_db()
-    cursor = conn.cursor()
-    try:
-        cursor.execute("ALTER TABLE bookings ADD COLUMN guests_count INTEGER DEFAULT 1")
-    except sqlite3.OperationalError:
-        pass
-    try:
-        cursor.execute("ALTER TABLE users ADD COLUMN email TEXT")
-    except sqlite3.OperationalError:
-        pass
-    conn.commit()
-    conn.close()
-
-init_db()
-migrate_db()
+    print("База данных создана с 6 отелями")
 
 # ========== МАРШРУТЫ ==========
 
@@ -466,5 +451,33 @@ def my_bookings():
     conn.close()
     return render_template('my_bookings.html', bookings=bookings)
 
+@app.route('/support', methods=['GET', 'POST'])
+def support():
+    if request.method == 'POST':
+        message = request.form.get('message')
+        if not message:
+            flash('Пожалуйста, введите сообщение', 'error')
+            return redirect(url_for('support'))
+        
+        auto_reply = generate_auto_reply(message)
+        flash('Сообщение отправлено!', 'success')
+        return render_template('support.html', user_message=message, bot_reply=auto_reply, show_reply=True)
+    
+    return render_template('support.html', show_reply=False)
+
+def generate_auto_reply(message):
+    message_lower = message.lower()
+    responses = {
+        'бронировани': "📅 Чтобы забронировать отель: перейдите на главную, найдите отель, выберите даты и заполните форму.",
+        'отмен': "❌ Для отмены бронирования напишите на support@hotelbooking.com",
+        'цена': "💰 Цены от 4000 до 10000 ₽ за ночь.",
+        'привет': "👋 Здравствуйте! Я виртуальный помощник. Чем могу помочь?",
+    }
+    for key, reply in responses.items():
+        if key in message_lower:
+            return reply
+    return "🤖 Спасибо за обращение! Наш специалист свяжется с вами."
+
 if __name__ == '__main__':
+    init_db()
     app.run(debug=True)
