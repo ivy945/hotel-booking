@@ -42,11 +42,6 @@ def get_db():
     return conn
 
 def init_db():
-    # Удаляем старую базу если есть
-    if os.path.exists('hotels.db'):
-        os.remove('hotels.db')
-        print("Старая база удалена")
-    
     conn = get_db()
     cursor = conn.cursor()
     
@@ -94,28 +89,41 @@ def init_db():
         )
     ''')
     
-    # Добавляем тестовых пользователей
-    users = [
-        ('admin', 'admin@hotelbooking.com', 'admin123', 1),
-        ('user', 'user@example.com', 'user123', 0),
-    ]
-    cursor.executemany("INSERT INTO users (username, email, password, is_admin) VALUES (?, ?, ?, ?)", users)
+    # Добавляем тестовых пользователей если их нет
+    cursor.execute("SELECT COUNT(*) FROM users")
+    if cursor.fetchone()[0] == 0:
+        users = [
+            ('admin', 'admin@hotelbooking.com', 'admin123', 1),
+            ('user', 'user@example.com', 'user123', 0),
+        ]
+        cursor.executemany("INSERT INTO users (username, email, password, is_admin) VALUES (?, ?, ?, ?)", users)
     
-    # Добавляем отели
-    hotels = [
-        ('Лотте Отель', 'Москва', 7000, 30, 'Роскошный 5-звездочный отель в самом центре Москвы', '/static/uploads/20260511_233259_hotel2.jpg', 1, 5.0),
-        ('История', 'Санкт-Петербург', 6000, 50, 'Уютный отель с панорамным видом на Неву', '/static/uploads/20260511_233400_hotel3.jpg', 1, 5.0),
-        ('Отель ДЭМ', 'Сухум', 8000, 20, 'Курортный отель с собственным пляжем', '/static/uploads/20260511_233501_hotel4.jpg', 1, 5.0),
-        ('Дворец Трезини', 'Санкт-Петербург', 10000, 21, 'Элегантный отель в историческом центре', '/static/uploads/20260511_233553_hotel5.jpg', 1, 5.0),
-        ('Отель Долина 960', 'Эсто-Садок', 5000, 20, 'Современный отель в горах', '/static/uploads/20260511_233716_hotel6.jpg', 1, 4.0),
-        ('Элементс', 'Киров', 4000, 40, 'Бизнес-отель в деловом центре', '/static/uploads/20260511_233825_hotel7.jpg', 1, 4.0),
-    ]
-    cursor.executemany('''INSERT INTO hotels (name, city, price_per_night, rooms_total, description, image_url, is_featured, rating) 
-                        VALUES (?,?,?,?,?,?,?,?)''', hotels)
+    # Добавляем отели если их нет
+    cursor.execute("SELECT COUNT(*) FROM hotels")
+    if cursor.fetchone()[0] == 0:
+        hotels = [
+            ('Лотте Отель', 'Москва', 7000, 30, 'Роскошный 5-звездочный отель в самом центре Москвы', '/static/uploads/20260511_233259_hotel2.jpg', 1, 5.0),
+            ('История', 'Санкт-Петербург', 6000, 50, 'Уютный отель с панорамным видом на Неву', '/static/uploads/20260511_233400_hotel3.jpg', 1, 5.0),
+            ('Отель ДЭМ', 'Сухум', 8000, 20, 'Курортный отель с собственным пляжем', '/static/uploads/20260511_233501_hotel4.jpg', 1, 5.0),
+            ('Дворец Трезини', 'Санкт-Петербург', 10000, 21, 'Элегантный отель в историческом центре', '/static/uploads/20260511_233553_hotel5.jpg', 1, 5.0),
+            ('Отель Долина 960', 'Эсто-Садок', 5000, 20, 'Современный отель в горах', '/static/uploads/20260511_233716_hotel6.jpg', 1, 4.0),
+            ('Элементс', 'Киров', 4000, 40, 'Бизнес-отель в деловом центре', '/static/uploads/20260511_233825_hotel7.jpg', 1, 4.0),
+        ]
+        cursor.executemany('''INSERT INTO hotels (name, city, price_per_night, rooms_total, description, image_url, is_featured, rating) 
+                            VALUES (?,?,?,?,?,?,?,?)''', hotels)
+    
+    # Добавляем колонку guests_count если её нет
+    try:
+        cursor.execute("ALTER TABLE bookings ADD COLUMN guests_count INTEGER DEFAULT 1")
+        print("✅ Добавлена колонка guests_count")
+    except sqlite3.OperationalError:
+        pass
     
     conn.commit()
     conn.close()
-    print("База данных создана с 6 отелями")
+    print("База данных готова")
+
+init_db()
 
 # ========== МАРШРУТЫ ==========
 
@@ -383,6 +391,8 @@ def search():
 def book_form(hotel_id):
     check_in = request.args.get('check_in')
     check_out = request.args.get('check_out')
+    guests = request.args.get('guests', 1, type=int)
+    price_per_night_with_guests = request.args.get('price_per_night', type=int)
     
     conn = get_db()
     cursor = conn.cursor()
@@ -390,19 +400,41 @@ def book_form(hotel_id):
     hotel = cursor.fetchone()
     conn.close()
     
-    if not hotel or not check_in or not check_out:
-        flash('Ошибка: неверные данные', 'error')
+    if not hotel:
+        flash('Отель не найден', 'error')
         return redirect(url_for('index'))
     
-    nights = (datetime.strptime(check_out, '%Y-%m-%d') - datetime.strptime(check_in, '%Y-%m-%d')).days
-    total_price = hotel['price_per_night'] * nights
+    if not check_in or not check_out:
+        flash('Пожалуйста, выберите даты', 'error')
+        return redirect(url_for('hotel_detail', hotel_id=hotel_id))
+    
+    try:
+        check_in_date = datetime.strptime(check_in, '%Y-%m-%d')
+        check_out_date = datetime.strptime(check_out, '%Y-%m-%d')
+        nights = (check_out_date - check_in_date).days
+        
+        if nights <= 0:
+            flash('Дата выезда должна быть позже даты заезда', 'error')
+            return redirect(url_for('hotel_detail', hotel_id=hotel_id))
+    except Exception as e:
+        flash('Ошибка в датах', 'error')
+        return redirect(url_for('hotel_detail', hotel_id=hotel_id))
+    
+    # Рассчитываем цену с учетом гостей
+    if not price_per_night_with_guests:
+        extra_per_guest = 500
+        price_per_night_with_guests = hotel['price_per_night'] + (guests - 1) * extra_per_guest
+    
+    total_price = price_per_night_with_guests * nights
     
     return render_template('booking.html', 
                          hotel=hotel, 
                          check_in=check_in, 
                          check_out=check_out, 
                          nights=nights, 
-                         total_price=total_price)
+                         total_price=total_price,
+                         guests=guests,
+                         price_per_night_with_guests=price_per_night_with_guests)
 
 @app.route('/confirm', methods=['POST'])
 @login_required
@@ -413,13 +445,14 @@ def confirm():
     check_in = request.form.get('check_in')
     check_out = request.form.get('check_out')
     total_price = request.form.get('total_price')
+    guests = request.form.get('guests', 1, type=int)
     
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO bookings (hotel_id, user_id, guest_name, guest_email, check_in, check_out, total_price)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    ''', (hotel_id, session['user_id'], guest_name, guest_email, check_in, check_out, total_price))
+        INSERT INTO bookings (hotel_id, user_id, guest_name, guest_email, check_in, check_out, total_price, guests_count)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (hotel_id, session['user_id'], guest_name, guest_email, check_in, check_out, total_price, guests))
     conn.commit()
     booking_id = cursor.lastrowid
     
@@ -433,7 +466,8 @@ def confirm():
                          hotel_name=hotel_name, 
                          check_in=check_in, 
                          check_out=check_out, 
-                         total_price=total_price)
+                         total_price=total_price,
+                         guests=guests)
 
 @app.route('/my_bookings')
 @login_required
@@ -467,19 +501,19 @@ def support():
 
 def generate_auto_reply(message):
     message_lower = message.lower()
-    responses = {
-        'бронировани': "📅 Чтобы забронировать отель: перейдите на главную, найдите отель, выберите даты и заполните форму.",
-        'отмен': "❌ Для отмены бронирования напишите на support@hotelbooking.com",
-        'цена': "💰 Цены от 4000 до 10000 ₽ за ночь.",
-        'привет': "👋 Здравствуйте! Я виртуальный помощник. Чем могу помочь?",
-    }
-    for key, reply in responses.items():
-        if key in message_lower:
-            return reply
-    return "🤖 Спасибо за обращение! Наш специалист свяжется с вами."
-
-# Всегда создаём базу при запуске
-init_db()
+    
+    if 'бронировани' in message_lower or 'забронирова' in message_lower:
+        return "📅 Чтобы забронировать отель:\n1️⃣ Перейдите на главную страницу\n2️⃣ Найдите нужный отель\n3️⃣ Выберите даты и количество гостей\n4️⃣ Заполните форму бронирования"
+    elif 'отмен' in message_lower:
+        return "❌ Для отмены бронирования напишите на support@hotelbooking.com с указанием номера брони"
+    elif 'цена' in message_lower or 'стоим' in message_lower:
+        return "💰 Цены на отели от 4000 до 10000 рублей за ночь. Точная цена зависит от отеля и сезона"
+    elif 'привет' in message_lower or 'здравствуй' in message_lower:
+        return "👋 Здравствуйте! Я виртуальный помощник HotelBooking. Чем могу помочь?"
+    elif 'спасиб' in message_lower:
+        return "🙏 Пожалуйста! Рады помочь. Хорошего дня!"
+    else:
+        return "🤖 Спасибо за обращение! Наш специалист свяжется с вами в ближайшее время."
 
 if __name__ == '__main__':
     app.run(debug=True)
